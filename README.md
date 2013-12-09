@@ -1,4 +1,4 @@
-# Jenkins plugin for sitespeed.io
+# Jenkins plugin for sitespeed.io [![Build Status](https://travis-ci.org/sitespeedio/jenkins.sitespeed.io.png?branch=master)](https://travis-ci.org/sitespeedio/jenkins.sitespeed.io)
 
 This is the official plugin for running sitespeed.io in Jenkins.
 
