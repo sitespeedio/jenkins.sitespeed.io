@@ -1,6 +1,6 @@
 # Jenkins plugin for sitespeed.io
 
-This is the official plugin for running sitespeed.io in Jenkins. Note: You need to download sitespeed.io from http://www.sitespeed.io and put that on your server, to be able to run.
+This is the official plugin for running sitespeed.io in Jenkins.
 
 ## Functionality
 - Test your site against sitespeed.io best practice web performance rules and metrics from the Navigation Timing API
