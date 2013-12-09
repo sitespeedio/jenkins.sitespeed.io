@@ -10,7 +10,12 @@ This is the official plugin for running sitespeed.io in Jenkins.
   - Navigation Timing API metrics per page
   - Page metrics (like number of javascripts, css and images) per page
   - Summary of the rules score & Navigation Timing API metrics for all tested pages
-  
+
+## How to
+- Build the HPI file
+- Installl the HPI file in Jenkins
+- Download the latest version of sitespeed.io from http://www.sitespeed.io and put that on your Jenkins server
+- Configure the plugin
 
 ## How to build the HPI file 
 ```
