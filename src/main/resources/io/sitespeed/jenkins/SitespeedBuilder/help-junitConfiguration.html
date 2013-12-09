@@ -1,0 +1,25 @@
+<div>
+<p>
+To fetch the JUnit XML files from sitespeed, add this to your build: 
+<ul>
+<li>Add a <em>Post build action</em></li>
+<li>Choose: <em>Publish JUnit test result report</em></li>
+<li>Add “Test report XMLs”: <em>junit/*.xml</em></li>
+</ul>
+</p>
+<p>
+Check out the <a href="http://www.sitespeed.io/documentation/#junit" target="_blank">documentation</a> 
+of how to configure the JUnit script. By default you don't have to configure anything to get it up and running but  
+you probably want to do two things:
+<ul>
+<li><em>-s</em> Skip these rule tests. A comma separated list of the key name of the rules; for example "ycsstop,yjsbottom"</li>
+<li><em>-t</em> Point out the XML timing limit file, the file where you set limits when a Navigation Time API timing value should fail a test.</li>
+</ul>
+</p>
+<p>  
+By default the resultBaseDir (where the script fetches the data) is set to Jenkins workspace dir + <em>/sitespeed-result/</em> and the output directory set to Jenkins workspace, and you can't change them running from Jenkins.
+ 
+</p> 
+</div> 
+
+
