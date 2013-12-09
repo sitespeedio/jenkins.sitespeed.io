@@ -16,6 +16,7 @@ This is the official plugin for running sitespeed.io in Jenkins.
 - Installl the HPI file in Jenkins
 - Download the latest version of sitespeed.io from http://www.sitespeed.io and put that on your Jenkins server
 - Configure the plugin
+- Take it easy
 
 ## How to build the HPI file 
 ```
