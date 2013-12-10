@@ -157,7 +157,7 @@ public class ConvertToGraphite {
 		}
 
 		key = config.getNamespace() + ".metrics.hosts."
-				+ getGraphiteKey(page.getUrl());
+				+ getGraphiteKey(page.getUrl()) + "num";
 		values.put(key, page.getHosts());
 		return values;
 	}
