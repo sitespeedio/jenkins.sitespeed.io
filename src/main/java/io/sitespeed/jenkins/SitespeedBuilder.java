@@ -45,15 +45,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 
@@ -187,8 +182,7 @@ public class SitespeedBuilder extends Builder {
 				returnValue = runJUnit(sitespeedOutputDir.getAbsolutePath(),
 						build.getWorkspace().toString(), logStream);
 
-				if (returnValue == 0)
-					if (checkGraphite)
+				if (returnValue == 0 && checkGraphite)
 						sendToGraphite(thisRunsOutputDir, logStream);
 			}
 
@@ -212,7 +206,7 @@ public class SitespeedBuilder extends Builder {
 		b.append(buildNumber).append("/")
 				.append(SitespeedConstants.DEFAULT_OUTPUT_DIR).append("/")
 				.append(domainDirName).append("/").append(dateDirName)
-				.append("/").append("index.html");
+				.append("/").append(htmlFile);
 		return b.toString();
 
 	}

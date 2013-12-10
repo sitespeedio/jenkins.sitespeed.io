@@ -32,6 +32,7 @@ import io.sitespeed.jenkins.xml.ReadSitespeedXMLFiles;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -86,7 +87,7 @@ public class ReadSitespeedXMLFilesJDOM implements ReadSitespeedXMLFiles {
 					+ SitespeedConstants.SUMMARY_XML_FILENAME));
 		} catch (IOException e) {
 			logStream.println(e);
-			return null;
+			return new SiteSummary(Collections.EMPTY_MAP, 0);
 		}
 
 	}

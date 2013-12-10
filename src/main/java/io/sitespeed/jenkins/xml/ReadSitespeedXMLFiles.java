@@ -33,12 +33,12 @@ import java.util.Set;
 
 public interface ReadSitespeedXMLFiles {
 
-	public abstract Set<Page> getAnalyzedPages(File pagesDir,
+	Set<Page> getAnalyzedPages(File pagesDir,
 			PrintStream logStream);
 
-	public abstract Set<PageTimings> getPageTimings(File metricsDir,
+	Set<PageTimings> getPageTimings(File metricsDir,
 			PrintStream logStream);
 
-	public abstract SiteSummary getSummary(File summaryDir, PrintStream logStream);
+	SiteSummary getSummary(File summaryDir, PrintStream logStream);
 
 }
