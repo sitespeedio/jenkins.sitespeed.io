@@ -1,4 +1,4 @@
-¨# sitespeed.io Jenkins plugin changelog
+# sitespeed.io Jenkins plugin changelog
 
 version 1.0 BETA 2 (NOT YET RELEASED)
 ----------------------
