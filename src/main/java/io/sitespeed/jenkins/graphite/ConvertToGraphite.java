@@ -148,7 +148,9 @@ public class ConvertToGraphite {
 				.entrySet()) {
 			values.put(key + entry.getKey(), entry.getValue());
 		}
-
+		
+		values.put(key + "hosts", page.getHosts());
+		
 		key = config.getNamespace() + ".metrics.assets.size."
 				+ getGraphiteKey(page.getUrl());
 		for (Map.Entry<String, String> entry : page.getAssetsAndSize()
@@ -156,9 +158,6 @@ public class ConvertToGraphite {
 			values.put(key + entry.getKey(), entry.getValue());
 		}
 
-		key = config.getNamespace() + ".metrics.hosts."
-				+ getGraphiteKey(page.getUrl()) + "num";
-		values.put(key, page.getHosts());
 		return values;
 	}
 
