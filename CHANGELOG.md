@@ -2,6 +2,8 @@
 
 version 1.0 BETA 3 (NOT YET RELEASED)
 ----------------------
+* Code cleanup
+* Help documentation cleanup
 
 version 1.0 BETA 2 (2013-12-12)
 ----------------------
