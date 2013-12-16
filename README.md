@@ -7,7 +7,7 @@ This is the official plugin for running sitespeed.io in Jenkins. Full documentat
 - Break builds using JUnit (both for rule score & Navigation Timing metrics)
 - Choose which data you want to send to Graphite:
   - Sitespeed.io rule score per page
-  - Navigation Timing API metrics per page
+  - Navigation Timing API & User Timings interval metrics per page
   - Page metrics (like number of javascripts, css and images) per page
   - Summary of the rules score & Navigation Timing API metrics for all tested pages
 
