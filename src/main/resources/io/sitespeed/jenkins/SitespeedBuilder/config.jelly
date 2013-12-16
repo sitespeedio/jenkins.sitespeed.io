@@ -32,7 +32,7 @@
     <f:textbox clazz="required"/>
   </f:entry>
     
-    <f:entry title="Send Navigation Timing API data per page" field="sendTimings">
+    <f:entry title="Send Navigation Timing API data intervals per page" field="sendTimings">
     <f:checkbox default="true"/> 
     </f:entry>
     <f:entry title="Send rules score per page" field="sendRules">
