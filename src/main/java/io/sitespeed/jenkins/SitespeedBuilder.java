@@ -180,7 +180,7 @@ public class SitespeedBuilder extends Builder {
 
 			if (returnValue == 0) {
 				returnValue = runJUnit(sitespeedOutputDir.getAbsolutePath(),
-						build.getWorkspace().toString(), logStream);
+						build.getWorkspace().getRemote(), logStream);
 
 				if (returnValue == 0 && checkGraphite)
 						sendToGraphite(thisRunsOutputDir, logStream);

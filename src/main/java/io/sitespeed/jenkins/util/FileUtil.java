@@ -95,7 +95,7 @@ public final class FileUtil {
 		// Get the output result dir, right now we use the workspace
 		// TODO make configurable and check for the -r parameter in the input
 
-		return new File(build.getWorkspace().toString() + "/" + build.getNumber() + "/"
+		return new File(build.getWorkspace().getRemote() + "/" + build.getNumber() + "/"
 				+ SitespeedConstants.DEFAULT_OUTPUT_DIR);
 	}
 
