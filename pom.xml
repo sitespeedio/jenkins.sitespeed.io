@@ -9,7 +9,7 @@
 
 	<groupId>io.sitespeed.jenkins</groupId>
 	<artifactId>sitespeed</artifactId>
-	<version>1.0-beta2</version>
+	<version>1.0-beta3</version>
 	<packaging>hpi</packaging>
 
 	<description>Jenkins plugin for sitespeed.io</description>
