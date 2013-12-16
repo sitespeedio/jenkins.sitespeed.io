@@ -1,6 +1,6 @@
 # Jenkins plugin for sitespeed.io [![Build Status](https://travis-ci.org/sitespeedio/jenkins.sitespeed.io.png?branch=master)](https://travis-ci.org/sitespeedio/jenkins.sitespeed.io)
 
-This is the official plugin for running sitespeed.io in Jenkins.
+This is the official plugin for running sitespeed.io in Jenkins. Full documentation: http://www.sitespeed.io/documentation/#jenkinsplugin
 
 ## Functionality
 - Test your site against sitespeed.io best practice web performance rules and metrics from the Navigation Timing API
@@ -28,7 +28,6 @@ and the file will be available in target/sitespeed.hpi
 
 ```
 mvn clean
-mvn install
 mvn hpi:run -Djetty.port=8090
 ```
 Access http://0.0.0.0:8090/jenkins/
