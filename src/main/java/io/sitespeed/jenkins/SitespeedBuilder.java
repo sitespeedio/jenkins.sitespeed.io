@@ -52,6 +52,8 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 
+import jenkins.model.Jenkins;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -186,8 +188,9 @@ public class SitespeedBuilder extends Builder {
 						sendToGraphite(thisRunsOutputDir, logStream);
 			}
 
-			String url = createUrlToAnalyzedPages(build.getNumber(),
+			String url = createUrlToAnalyzedPages(build.getProject().getName(), build.getNumber(),
 					domainDirName, dateDirName, "index.html");
+			
 			build.addAction(new SitespeedLinkAction("Sitespeed.io report", url,
 					ICON_URL, "This is a sitespeed.io report"));
 
@@ -200,10 +203,10 @@ public class SitespeedBuilder extends Builder {
 		return false;
 	}
 
-	private String createUrlToAnalyzedPages(int buildNumber,
+	private String createUrlToAnalyzedPages(String projectName, int buildNumber,
 			String domainDirName, String dateDirName, String htmlFile) {
-		StringBuilder b = new StringBuilder("/job/sitespeed.io/ws/");
-		b.append(buildNumber).append("/")
+		StringBuilder b = new StringBuilder("/job/");
+		b.append(projectName).append("/ws/").append(buildNumber).append("/")
 				.append(SitespeedConstants.DEFAULT_OUTPUT_DIR).append("/")
 				.append(domainDirName).append("/").append(dateDirName)
 				.append("/").append(htmlFile);
