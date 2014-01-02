@@ -1,6 +1,10 @@
 # sitespeed.io Jenkins plugin changelog
 
-version 1.0 BETA 3 (NOT YET RELEASED)
+version 1.0 BETA 4
+----------------------
+* Fixed hardcoded project name (note the project name can't contain spaces right now)
+
+version 1.0 BETA 3
 ----------------------
 * Code cleanup
 * Help documentation cleanup
