@@ -159,7 +159,7 @@ public class SitespeedBuilder extends Builder {
 		PrintStream logStream = listener.getLogger();
 
 		// TODO check that everything is setup ok.
-		if (!validateInput(logStream))
+		if (!validateInput(build,logStream))
 			return false;
 
 		File sitespeedOutputDir = FileUtil.getInstance().getSitespeedOutputDir(
@@ -271,13 +271,21 @@ public class SitespeedBuilder extends Builder {
 
 	}
 
-	private boolean validateInput(PrintStream logStream) {
+	private boolean validateInput(AbstractBuild<?, ?> build,
+			PrintStream logStream) {
 
-		if (sitespeedConfiguration == null || "".equals(sitespeedConfiguration)) {
-			logStream
-					.print("You need to configure how sitespeed.io should run");
+		// Right now the project name cannot contain any spaces
+		if (build.getProject().getName().indexOf(" ") > -1) {
+			logStream.println("The project name can't contain any spaces:"
+					+ build.getProject().getName());
 			return false;
 		}
+		if (sitespeedConfiguration == null || "".equals(sitespeedConfiguration)) {
+			logStream
+					.println("You need to configure how sitespeed.io should run");
+			return false;
+		}
+
 		return true;
 
 	}
