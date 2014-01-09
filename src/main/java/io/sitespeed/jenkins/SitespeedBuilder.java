@@ -52,8 +52,6 @@ import java.util.Set;
 
 import javax.servlet.ServletException;
 
-import jenkins.model.Jenkins;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -94,7 +92,11 @@ public class SitespeedBuilder extends Builder {
 			String junitConfiguration, String home,
 			GraphiteConfiguration checkGraphite) {
 		this.sitespeedConfiguration = sitespeedConfiguration;
-		this.home = home;
+   
+		if (home != null && !home.endsWith(File.separator))
+          this.home = home + File.separator;
+        else
+          this.home = home;
 		this.junitConfiguration = junitConfiguration;
 
 		graphiteConfig = checkGraphite;
@@ -366,7 +368,11 @@ public class SitespeedBuilder extends Builder {
 		public FormValidation doValidateHomeDir(
 				@QueryParameter("home") final String home) throws IOException,
 				ServletException {
-			File sitespeedScript = new File(home
+		    String sitespeedHome = home;
+		    if (home != null && !home.endsWith(File.separator))
+	          sitespeedHome = home + File.separator;
+		    
+			File sitespeedScript = new File(sitespeedHome
 					+ SitespeedConstants.SITESPEED_IO_SCRIPT);
 			if (sitespeedScript.exists())
 				return FormValidation.ok("Setup ok");
