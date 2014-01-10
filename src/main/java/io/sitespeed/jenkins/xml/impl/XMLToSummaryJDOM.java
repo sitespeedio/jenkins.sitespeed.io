@@ -35,6 +35,9 @@ import org.jdom2.input.sax.XMLReaderSAX2Factory;
 
 public class XMLToSummaryJDOM {
 
+
+  public static final String[] BROWSER_NAMES = {"Chrome", "Firefox", "IE", "Safari"};
+  
   public SiteSummary get(File summaryXML) throws IOException {
 
     final SAXBuilder b = new SAXBuilder(new XMLReaderSAX2Factory(false));
@@ -49,6 +52,7 @@ public class XMLToSummaryJDOM {
     // TODO today the cache time is in seconds, probably should be converted to minutes?
     for (Element metric : doc.getRootElement().getChild("metrics").getChildren()) {
       String name = metric.getName();
+      name = fixBrowserKey(name);
       HashMap<String, String> the = new HashMap<String, String>();
       for (Element valueType : metric.getChildren()) {
         the.put(valueType.getName(), valueType.getValue());
@@ -61,6 +65,29 @@ public class XMLToSummaryJDOM {
     return new SiteSummary(values, pages);
   }
 
+  private String fixBrowserKey(String key) {
+    // If the keys are summary values and ends
+    // with the browser names, then it is individual
+    // browser timings, add a . to make it look good
+    // in Graphite
+    boolean isSpecificBrowserValue = false;
+    for (String browser : BROWSER_NAMES) {
+      System.out.println(browser + " " + key.endsWith(browser) + " " + key);
+      if (key.endsWith(browser)) isSpecificBrowserValue = true;
+    }
+
+    if (!isSpecificBrowserValue)
+      return key;
+    else {
+      for (String browser : BROWSER_NAMES) {
+        if (key.endsWith(browser)) {
+          System.out.println("Replacing:" + key.replaceFirst(browser, "." + browser.toLowerCase()));
+          return key.replaceFirst(browser, "." + browser.toLowerCase());
+        }
+      }
+      return key;
+    }
+  }
 
 
 }
