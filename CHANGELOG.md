@@ -1,8 +1,9 @@
 # sitespeed.io Jenkins plugin changelog
 
-version 1.0 BETA 5 (NOT RELEASED)
+version 1.0 BETA 5
 ----------------------
 * If homedir lack of a path separator, add it.
+* More doc about that your Jenkins user need right priveleges to run the sitespeed script.
 
 version 1.0 BETA 4
 ----------------------
