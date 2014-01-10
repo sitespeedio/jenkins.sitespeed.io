@@ -64,7 +64,7 @@ public class ReadSitespeedXMLFilesJDOM implements ReadSitespeedXMLFiles {
 
     Set<PageTimings> pageTimings = new HashSet<PageTimings>();
     
-    // The metric file has browser directoris depending on how many 
+    // The metric file has browser directories depending on how many 
     // browsers you used when you where testing
     File[] browserDirs = metricsDir.listFiles(); 
     for (File dir : browserDirs) {
