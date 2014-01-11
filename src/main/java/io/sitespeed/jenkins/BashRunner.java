@@ -20,6 +20,8 @@
  */
 package io.sitespeed.jenkins;
 
+import hudson.EnvVars;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Run commands using Bash.
@@ -46,7 +49,8 @@ public class BashRunner {
     this.homeDir = homeDir;
   }
 
-  public int run(String command, List<String> args, PrintStream stream) throws InterruptedException {
+  public int run(String command, List<String> args, EnvVars env, PrintStream stream)
+      throws InterruptedException {
 
     try {
       List<String> processArguments = new LinkedList<String>();
@@ -54,6 +58,16 @@ public class BashRunner {
       processArguments.addAll(args);
 
       ProcessBuilder pb = new ProcessBuilder(processArguments);
+
+      // Copy build env to the process, fix the DISPLAY env
+      Map<String, String> processEnv = pb.environment();
+
+      if (env != null) {
+        for (String key : env.keySet()) {
+          processEnv.put(key, env.get(key));
+        }
+      }
+
       pb.directory(new File(homeDir));
       pb.redirectErrorStream(true);
       Process p = pb.start();

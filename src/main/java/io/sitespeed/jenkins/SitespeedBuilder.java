@@ -20,6 +20,7 @@
  */
 package io.sitespeed.jenkins;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.BuildListener;
@@ -152,6 +153,18 @@ public class SitespeedBuilder extends Builder {
   @Override
   public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
 
+    //  Get environment, TODO cleanup
+    EnvVars env = null;
+    try {
+      env = build.getEnvironment(listener);
+    } catch (IOException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    } catch (InterruptedException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
+    }
+   
     PrintStream logStream = listener.getLogger();
 
     // TODO check that everything is setup ok.
@@ -161,7 +174,7 @@ public class SitespeedBuilder extends Builder {
 
     try {
       // First run sitespeed
-      int returnValue = runSitespeed(sitespeedOutputDir.getAbsolutePath(), logStream);
+      int returnValue = runSitespeed(sitespeedOutputDir.getAbsolutePath(), env, logStream);
       String domainDirName =
           FileUtil.getInstance().getLastModifiedFileNameInDir(sitespeedOutputDir);
 
@@ -173,7 +186,7 @@ public class SitespeedBuilder extends Builder {
 
       if (returnValue == 0) {
         returnValue =
-            runJUnit(sitespeedOutputDir.getAbsolutePath(), build.getWorkspace().getRemote(),
+            runJUnit(sitespeedOutputDir.getAbsolutePath(), build.getWorkspace().getRemote(), env,
                 logStream);
 
         if (returnValue == 0 && checkGraphite) sendToGraphite(thisRunsOutputDir, logStream);
@@ -205,20 +218,21 @@ public class SitespeedBuilder extends Builder {
 
   }
 
-  private int runJUnit(String resultBaseDir, String outputDir, PrintStream logStream)
+  private int runJUnit(String resultBaseDir, String outputDir, EnvVars env, PrintStream logStream)
       throws InterruptedException {
     BashRunner runner = new BashRunner(home);
     ParameterHelper paramHelper = new ParameterHelper(logStream);
     List<String> args = paramHelper.getJUnitParamters(junitConfiguration, outputDir, resultBaseDir);
-    return runner.run(SitespeedConstants.SITESPEED_IO_JUNIT_SCRIPT, args, logStream);
+    return runner.run(SitespeedConstants.SITESPEED_IO_JUNIT_SCRIPT, args, env, logStream);
 
   }
 
-  private int runSitespeed(String resultBaseDir, PrintStream logStream) throws InterruptedException {
+  private int runSitespeed(String resultBaseDir, EnvVars env, PrintStream logStream)
+      throws InterruptedException {
     BashRunner runner = new BashRunner(home);
     ParameterHelper paramHelper = new ParameterHelper(logStream);
     List<String> args = paramHelper.getSitespeedParameters(sitespeedConfiguration, resultBaseDir);
-    return runner.run(SitespeedConstants.SITESPEED_IO_SCRIPT, args, logStream);
+    return runner.run(SitespeedConstants.SITESPEED_IO_SCRIPT, args, env, logStream);
   }
 
   private boolean sendToGraphite(String fullOutputDir, PrintStream logStream) {
