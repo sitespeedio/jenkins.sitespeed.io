@@ -153,18 +153,7 @@ public class SitespeedBuilder extends Builder {
   @Override
   public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
 
-    //  Get environment, TODO cleanup
-    EnvVars env = null;
-    try {
-      env = build.getEnvironment(listener);
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    } catch (InterruptedException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-   
+    EnvVars env = getEnvironment(build, listener);
     PrintStream logStream = listener.getLogger();
 
     // TODO check that everything is setup ok.
@@ -281,6 +270,21 @@ public class SitespeedBuilder extends Builder {
 
     return true;
 
+  }
+
+  private EnvVars getEnvironment(AbstractBuild<?, ?> build, BuildListener listener) {
+
+    try {
+      return build.getEnvironment(listener);
+    } catch (IOException e1) {
+      listener.getLogger().println("Couldn't fetch environment variables:" + e1);
+      e1.printStackTrace();
+    } catch (InterruptedException e1) {
+      listener.getLogger().println("Couldn't fetch environment variables:" + e1);
+      e1.printStackTrace();
+    }
+
+    return new EnvVars();
   }
 
   @Extension
