@@ -1,3 +1,4 @@
 <div>
-  Sitespeed.io will analyze and test your web site for web best practice rules. 
+  This plugin will analyze and test your web site for web best practice rules and get 
+  Navigation Timing API metrics using <a href="http://www.sitespeed.io">sitespeed.io</a>.
 </div>
