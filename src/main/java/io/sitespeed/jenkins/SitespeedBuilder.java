@@ -26,6 +26,7 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -300,12 +301,27 @@ public class SitespeedBuilder extends Builder {
         return FormValidation.ok();
     }
 
-    public FormValidation doCheckHome(@QueryParameter String value) throws IOException,
+    public FormValidation doCheckHome(@QueryParameter File value) throws IOException,
         ServletException {
-      if (value.length() == 0)
-        return FormValidation.error("Please set the home dir");
-      else
+      if (!Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
         return FormValidation.ok();
+      }
+      
+      if ("".equals(value.getPath()))
+        return FormValidation.error("Please set the home dir");
+      
+      if (!value.isDirectory()) {
+        return FormValidation.error("This is not a directory");
+      }
+
+      final File sitespeedExecutable = new File(value, "bin/sitespeed.io");
+      if (!sitespeedExecutable.exists()) {
+        return FormValidation.error("The sitespeed.io script doesn't exist:" + sitespeedExecutable.getAbsolutePath());
+      }
+      if (!sitespeedExecutable.canExecute()) {
+        return FormValidation.error("The sitespeed.io script isn't executable");
+      }
+      return FormValidation.ok();
     }
 
     public FormValidation doCheckNamespace(@QueryParameter String value) throws IOException,
