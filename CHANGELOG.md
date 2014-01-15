@@ -1,4 +1,10 @@
 # sitespeed.io Jenkins plugin changelog
+
+version 1.0 BETA 7
+----------------------
+* Added better check for the sitespeed home dir (check that the script exist & is executable)
+* Added support for testing in multiple browsers (sitespeed.io 2.5)  
+
 version 1.0 BETA 6
 ----------------------
 * Copy environment variables to the bash runner, fixes problem with Xvfb
