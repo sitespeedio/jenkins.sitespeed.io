@@ -30,6 +30,7 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 /**
  * Run commands using Bash.
@@ -52,6 +53,7 @@ public class BashRunner {
   public int run(String command, List<String> args, EnvVars env, PrintStream stream)
       throws InterruptedException {
 
+    args = translateEnvInArgs(args, env);
     try {
       List<String> processArguments = new LinkedList<String>();
       processArguments.add(command);
@@ -84,6 +86,20 @@ public class BashRunner {
       stream.println(e.toString());
       return -1;
     }
+  }
+
+  private List<String> translateEnvInArgs(List<String> args, EnvVars env) {
+
+    if (env != null) {
+      List<String> modifiedArgs = new LinkedList<String>();
+      for (String key : env.keySet()) {
+        for (String argument : args) {
+          modifiedArgs.add(argument.replaceAll(Matcher.quoteReplacement("$" + key), env.get(key)));
+        }
+      }
+      return modifiedArgs;
+    } else
+      return args;
   }
 
 }
