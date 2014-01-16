@@ -1,4 +1,9 @@
 # sitespeed.io Jenkins plugin changelog
+
+version 1.0 BETA 7 (not released yet)
+----------------------
+* Translate Jenkins ENV variables in arguments sent to the sitespeed scripts
+
 version 1.0 BETA 6
 ----------------------
 * Copy environment variables to the bash runner, fixes problem with Xvfb
