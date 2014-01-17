@@ -89,17 +89,17 @@ public class BashRunner {
   }
 
   private List<String> translateEnvInArgs(List<String> args, EnvVars env) {
-
     if (env != null) {
       List<String> modifiedArgs = new LinkedList<String>();
-      for (String key : env.keySet()) {
-        for (String argument : args) {
-          modifiedArgs.add(argument.replaceAll(Matcher.quoteReplacement("$" + key), env.get(key)));
+      for (String argument : args) {
+        for (String key : env.keySet()) {
+          argument = argument.replaceAll(Matcher.quoteReplacement("$" + key), env.get(key));
         }
+        modifiedArgs.add(argument);
       }
       return modifiedArgs;
     } else
       return args;
   }
-
+  
 }
