@@ -26,6 +26,7 @@ import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -153,18 +154,7 @@ public class SitespeedBuilder extends Builder {
   @Override
   public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
 
-    //  Get environment, TODO cleanup
-    EnvVars env = null;
-    try {
-      env = build.getEnvironment(listener);
-    } catch (IOException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    } catch (InterruptedException e1) {
-      // TODO Auto-generated catch block
-      e1.printStackTrace();
-    }
-   
+    EnvVars env = getEnvironment(build, listener);
     PrintStream logStream = listener.getLogger();
 
     // TODO check that everything is setup ok.
@@ -283,6 +273,21 @@ public class SitespeedBuilder extends Builder {
 
   }
 
+  private EnvVars getEnvironment(AbstractBuild<?, ?> build, BuildListener listener) {
+
+    try {
+      return build.getEnvironment(listener);
+    } catch (IOException e1) {
+      listener.getLogger().println("Couldn't fetch environment variables:" + e1);
+      e1.printStackTrace();
+    } catch (InterruptedException e1) {
+      listener.getLogger().println("Couldn't fetch environment variables:" + e1);
+      e1.printStackTrace();
+    }
+
+    return new EnvVars();
+  }
+
   @Extension
   public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
@@ -296,12 +301,27 @@ public class SitespeedBuilder extends Builder {
         return FormValidation.ok();
     }
 
-    public FormValidation doCheckHome(@QueryParameter String value) throws IOException,
+    public FormValidation doCheckHome(@QueryParameter File value) throws IOException,
         ServletException {
-      if (value.length() == 0)
-        return FormValidation.error("Please set the home dir");
-      else
+      if (!Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
         return FormValidation.ok();
+      }
+      
+      if ("".equals(value.getPath()))
+        return FormValidation.error("Please set the home dir");
+      
+      if (!value.isDirectory()) {
+        return FormValidation.error("This is not a directory");
+      }
+
+      final File sitespeedExecutable = new File(value, "bin/sitespeed.io");
+      if (!sitespeedExecutable.exists()) {
+        return FormValidation.error("The sitespeed.io script doesn't exist:" + sitespeedExecutable.getAbsolutePath());
+      }
+      if (!sitespeedExecutable.canExecute()) {
+        return FormValidation.error("The sitespeed.io script isn't executable");
+      }
+      return FormValidation.ok();
     }
 
     public FormValidation doCheckNamespace(@QueryParameter String value) throws IOException,

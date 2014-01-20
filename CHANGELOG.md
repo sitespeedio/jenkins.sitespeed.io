@@ -1,8 +1,11 @@
 # sitespeed.io Jenkins plugin changelog
 
-version 1.0 BETA 7 (not released yet)
+version 1.0 BETA 7
 ----------------------
 * Translate Jenkins ENV variables in arguments sent to the sitespeed scripts
+* Added better check for the sitespeed home dir (check that the script exist & is executable)
+* Added support for testing in multiple browsers (sitespeed.io 2.5)  
+* Needs sitespeed.io version 2.5 to run correctly (when fetching browser timings)
 
 version 1.0 BETA 6
 ----------------------
