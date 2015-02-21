@@ -1,26 +1,11 @@
 /**
- * The MIT License
- * 
- * Copyright (c) 2013, Sitespeed.io organization, Peter Hedenskog
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Sitespeed.io - How speedy is your site? (http://www.sitespeed.io) Copyright (c) 2014, Peter
+ * Hedenskog, Tobias Lidskog and other contributors Released under the Apache 2.0 License
  */
 package io.sitespeed.jenkins;
 
 import hudson.EnvVars;
+import io.sitespeed.jenkins.util.FileUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,29 +20,44 @@ import java.util.regex.Matcher;
 /**
  * Run commands using Bash.
  * 
- * @author peter
+ * @author Peter Hedenskog.
  * 
  */
 public class BashRunner {
 
-  private final String homeDir;
+  private final String executable;
 
   /**
+   * Create the class. Tell which executable to run.
    * 
-   * @param homeDir is the home of the script/command to run.
+   * @param executable is the executable to run.
    */
-  public BashRunner(String homeDir) {
-    this.homeDir = homeDir;
+  public BashRunner(String executable) {
+    this.executable = executable;
   }
 
-  public int run(String command, List<String> args, EnvVars env, PrintStream stream)
+  /**
+   * Run the executable.
+   * 
+   * @param args the argument to the executable.
+   * @param env the environment vars from Jenkins.
+   * @param stream the Jenkins log stream
+   * @param outputFile the file where the output from the command will be written. If null, no file
+   *        is created.
+   * @return
+   * @throws InterruptedException
+   */
+  public int run(List<String> args, EnvVars env, PrintStream stream, String outputFile)
       throws InterruptedException {
 
     args = translateEnvInArgs(args, env);
     try {
       List<String> processArguments = new LinkedList<String>();
-      processArguments.add(command);
+      processArguments.add(executable);
       processArguments.addAll(args);
+
+      stream.println("Will run executable" + this.executable + " with arguments: "
+          + processArguments);
 
       ProcessBuilder pb = new ProcessBuilder(processArguments);
 
@@ -70,23 +70,31 @@ public class BashRunner {
         }
       }
 
-      pb.directory(new File(homeDir));
+
       pb.redirectErrorStream(true);
       Process p = pb.start();
 
       BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+      StringBuilder output = new StringBuilder();
       String line = "";
       while ((line = input.readLine()) != null) {
         stream.println(line);
+        output.append(line);
       }
 
       input.close();
+
+      if (outputFile != null) {
+        FileUtil.getInstance().storeFile(outputFile, output.toString(), stream);
+      }
       return p.waitFor();
     } catch (IOException e) {
       stream.println(e.toString());
       return -1;
     }
+
   }
+
 
   private List<String> translateEnvInArgs(List<String> args, EnvVars env) {
     if (env != null) {
@@ -101,5 +109,5 @@ public class BashRunner {
     } else
       return args;
   }
-  
+
 }

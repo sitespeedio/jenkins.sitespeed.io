@@ -1,57 +1,106 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
 
- <f:entry title="Home dir of sitespeed.io" field="home">
-    <f:textbox clazz="required"/>
-  </f:entry>	
-  
-  <f:validateButton
-   title="Validate home dir" progress="Testing..."
-   method="validateHomeDir" with="home" />
+<f:entry title="Generate TAP/JUnit/Perf Budget" field="output">
+	<f:entry>
+    	<f:radio name="output" title="JUnit XML" value="junit" checked="${instance.output == 'junit'}" />
+   	</f:entry>
+    <f:entry>
+    	<f:radio name="output" title="TAP" value="tap" checked="${instance.output == 'tap'}" />
+    </f:entry>
+    <f:entry>
+    	<f:radio name="output" title="Budget" value="budget" checked="${instance.output == 'budget'}" />
+    </f:entry>
+</f:entry>
+      
+<f:entry title="URL list" field="urls">
+	<f:textarea clazz="required"/>
+</f:entry>	
+  		
+  		
+<f:entry field="crawlDepth" title="Choose how deep to crawl">
+ 	<f:select />
+</f:entry>
 
-  <f:entry title="Sitespeed.io configuration" field="sitespeedConfiguration">
+<f:entry field="browser" title="Choose browser">
+ 	<f:select />
+</f:entry>
+
+<f:entry field="runs" title="Choose number or runs in the browser">
+ 	<f:select />
+</f:entry>
+
+<f:entry title="JUnit/TAP/Budget configuration" field="budget">
    <f:textarea/>
-  </f:entry>
-  
-    <f:entry title="JUnit configuration" field="junitConfiguration">
-   <f:textarea/>
-  </f:entry>
+</f:entry> 		
+ 
+
+ <f:block>
+ 	<f:optionalBlock name="checkExtraConfiguration" checked="${instance.checkExtraConfiguration}" title="Add extra configuration">
+		<f:entry title="Sitespeed.io extra configuration" field="sitespeedConfiguration">
+			<f:textarea/>
+ 		</f:entry>
+	</f:optionalBlock>
+</f:block>   
   
 
-   <f:block>
   
-    <f:optionalBlock name="checkGraphite" checked="${instance.checkGraphite}" title="Send to Graphite">
-      <f:entry title="Host" field="host">
-    	<f:textbox />
- 	 </f:entry>
+<f:block>
+	<f:optionalBlock name="checkPath" checked="${instance.checkPath}" title="Configure path to exec"> 
+  		<f:entry title="The full path to sitespeed.io " field="sitespeedExecutable">
+    		<f:textbox clazz="required" default="sitespeed.io"/>
+  		</f:entry>
+  	
+ 	 	<f:validateButton title="Validate binary" progress="Testing..." method="validateBinary" with="home" />
+ 	</f:optionalBlock>
+</f:block>    
   
-  <f:entry title="Port" field="port">
-    <f:number class="positive-number" default="2003"/>
-  </f:entry>
+
+<f:block>
+	<f:optionalBlock name="checkGraphite" checked="${instance.checkGraphite}" title="Send to Graphite">
+    	<f:entry title="Host" field="host">
+    		<f:textbox />
+ 	 	</f:entry>
   
-   <f:entry title="Namespace of the Graphite keys" field="namespace">
-    <f:textbox clazz="required"/>
-  </f:entry>
+ 		<f:entry title="Port" field="port">
+    		<f:number class="positive-number" default="2003"/>
+  		</f:entry>
+  
+   		<f:entry title="Namespace of the Graphite keys" field="namespace">
+    		<f:textbox clazz="required"/>
+  		</f:entry>
     
-    <f:entry title="Send Navigation Timing API data intervals per page" field="sendTimings">
-    <f:checkbox default="true"/> 
-    </f:entry>
-    <f:entry title="Send rules score per page" field="sendRules">
-    <f:checkbox default="true"/> 
-    </f:entry>
-    <f:entry title="Send page metrics per page" field="sendPageMetrics">
-    <f:checkbox default="true"/> 
-    </f:entry>
-    <f:entry title="Send rule score and Navigation Timing API summary" field="sendSummary">
-    <f:checkbox default="true"/> 
-    </f:entry>
+    	<f:entry title="Send Navigation Timing API data intervals per page" field="sendTimings">
+    		<f:checkbox default="true"/> 
+    	</f:entry>
+    	<f:entry title="Send rules score per page" field="sendRules">
+    		<f:checkbox default="true"/> 
+    	</f:entry>
+    	<f:entry title="Send page metrics per page" field="sendPageMetrics">
+    		<f:checkbox default="true"/> 
+    	</f:entry>
+    	<f:entry title="Send rule score and Navigation Timing API summary" field="sendSummary">
+    		<f:checkbox default="true"/> 
+    	</f:entry>
     
-    <f:validateButton
-   title="Test Graphite connection" progress="Testing..."
-   method="testConnection" with="port,host" />
-    
-    
-    </f:optionalBlock>
-   
+    	<f:validateButton title="Test Graphite connection" progress="Testing..." method="testConnection" with="port,host" />
+    </f:optionalBlock> 
 </f:block>
+ 	
+
+<f:block>
+	<f:optionalBlock name="checkWpt" checked="${instance.checkWpt}" title="Test using WebPageTest">
+    	<f:entry title="Hostname" field="wptHost">
+    		<f:textbox />
+ 	 	</f:entry>
+ 	  	<f:entry title="WPTKey" field="wptKey">
+    		<f:textbox />
+ 	 	</f:entry>
+ 	 	<f:entry title="WPT configuration" field="wptConfig">
+    		<f:textarea />
+ 	 	</f:entry>
+ 	 </f:optionalBlock>
+</f:block>
+  
+ 	
  	
 </j:jelly>

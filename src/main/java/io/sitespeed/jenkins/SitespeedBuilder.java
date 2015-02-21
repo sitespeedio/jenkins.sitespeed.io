@@ -1,22 +1,8 @@
 /**
- * The MIT License
- * 
- * Copyright (c) 2013, Sitespeed.io organization, Peter Hedenskog
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * Sitespeed.io - How speedy is your site? (http://www.sitespeed.io)
+ * Copyright (c) 2014, Peter Hedenskog, Tobias Lidskog
+ * and other contributors
+ * Released under the Apache 2.0 License
  */
 package io.sitespeed.jenkins;
 
@@ -30,24 +16,21 @@ import hudson.model.Hudson;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
-import io.sitespeed.jenkins.data.Page;
-import io.sitespeed.jenkins.data.PageTimings;
-import io.sitespeed.jenkins.data.SiteSummary;
-import io.sitespeed.jenkins.graphite.ConvertToGraphite;
+import hudson.util.ListBoxModel;
+import io.sitespeed.jenkins.BashRunner;
+import io.sitespeed.jenkins.ParameterHelper;
+import io.sitespeed.jenkins.SitespeedConstants;
+import io.sitespeed.jenkins.SitespeedLinkAction;
 import io.sitespeed.jenkins.graphite.GraphiteConfiguration;
 import io.sitespeed.jenkins.graphite.GraphiteSender;
 import io.sitespeed.jenkins.util.FileUtil;
-import io.sitespeed.jenkins.xml.ReadSitespeedXMLFiles;
-import io.sitespeed.jenkins.xml.impl.ReadSitespeedXMLFilesJDOM;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 
@@ -59,27 +42,47 @@ public class SitespeedBuilder extends Builder {
   /**
    * The configuration sent to the sitespeed script.
    */
-  private final String sitespeedConfiguration;
+  private final ExtraConfiguration extraConfiguration;
 
   /**
    * The JUnit configuration.
    */
-  private final String junitConfiguration;
+  private final String budget;
 
   /**
-   * The home dir of the sitespeed script.
+   * The home the sitespeed executable.
    */
-  private final String home;
+  private final String sitespeedExecutable;
 
+  private final String browser;
+  
+  private final Integer runs;
+  
   /**
    * If Graphite is checked or not.
    */
   private final boolean checkGraphite;
+  
+  private final boolean checkExtraConfiguration;
+  
+  private final boolean checkPath;
+  
+  private final boolean checkWpt;
+
+  private GraphiteConfiguration graphiteConfig;
+  
+  private final String urls;
+  
+  private final Integer crawlDepth;
+  
+  private final WPTConfiguration wptConfig;
 
   /**
-   * Configuration for Graphite.
+   * The output type JUnitXML/TAP or budget
    */
-  private final GraphiteConfiguration graphiteConfig;
+  private final String output;
+  
+  private final String defaultBudget = "{\"rules\": \n{ \"default\": 90 }\n}";
 
   /**
    * The URL to the sitespeed logo.
@@ -87,19 +90,26 @@ public class SitespeedBuilder extends Builder {
   private static final String ICON_URL = "/plugin/sitespeed/logo48x48.png";
 
   @DataBoundConstructor
-  public SitespeedBuilder(String sitespeedConfiguration, String junitConfiguration, String home,
-      GraphiteConfiguration checkGraphite) {
-    this.sitespeedConfiguration = sitespeedConfiguration;
+  public SitespeedBuilder(ExtraConfiguration extraConfiguration, String budget, ExecutablePathConfiguration executablePath,
+      String output, GraphiteConfiguration checkGraphite, String urls, Integer crawlDepth, String browser, Integer runs, WPTConfiguration wptConfig) {
+    this.extraConfiguration = extraConfiguration;
 
-    if (home != null && !home.endsWith(File.separator))
-      this.home = home + File.separator;
-    else
-      this.home = home;
-    this.junitConfiguration = junitConfiguration;
-
+    this.sitespeedExecutable = executablePath == null ? "sitespeed.io" : executablePath.getSitespeedExecutable();
+    this.budget = "".equals(budget) ? defaultBudget: budget;
+    this.wptConfig = wptConfig;
+    this.urls = urls;
+    
+    this.browser = browser;
+    this.runs = runs;
+ 
     graphiteConfig = checkGraphite;
     this.checkGraphite = checkGraphite == null ? false : true;
-
+    this.checkExtraConfiguration = extraConfiguration == null ? false : true;
+    this.checkPath = executablePath == null ? false : true;
+    this.checkWpt = wptConfig == null ? false : true;
+    this.output = output == null ? "junit" : output;
+    this.crawlDepth = crawlDepth == null ? 0 : crawlDepth;
+ 
   }
 
   @Override
@@ -107,16 +117,36 @@ public class SitespeedBuilder extends Builder {
     return (DescriptorImpl) super.getDescriptor();
   }
 
-  public String getHome() {
-    return home;
+  public String getSitespeedExecutable() {
+    return sitespeedExecutable;
+  }
+  
+  public int getCrawlDepth() {
+    return crawlDepth;
+  }
+  
+  public String getBrowser() {
+    return browser;
+  }
+  
+  public int getRuns() {
+    return runs;
+  }
+  
+  public String getOutput() {
+    return output;
+  }
+  
+  public String getUrls() {
+    return urls;
   }
 
   public String getHost() {
     return graphiteConfig != null ? graphiteConfig.getHost() : "";
   }
 
-  public String getJunitConfiguration() {
-    return junitConfiguration;
+  public String getBudget() {
+    return budget;
   }
 
   public String getNamespace() {
@@ -127,28 +157,21 @@ public class SitespeedBuilder extends Builder {
     return graphiteConfig != null ? graphiteConfig.getPort() + "" : "";
   }
 
-  public String getSitespeedConfiguration() {
-    return sitespeedConfiguration;
-  }
 
   public boolean isCheckGraphite() {
     return checkGraphite;
   }
-
-  public boolean isSendPageMetrics() {
-    return graphiteConfig != null ? graphiteConfig.isSendPageMetrics() : true;
+  
+  public boolean isCheckPath() {
+    return checkPath;
   }
-
-  public boolean isSendRules() {
-    return graphiteConfig != null ? graphiteConfig.isSendRules() : true;
+  
+  public boolean isCheckWpt() {
+    return checkWpt;
   }
-
-  public boolean isSendTimings() {
-    return graphiteConfig != null ? graphiteConfig.isSendTimings() : true;
-  }
-
-  public boolean isSendSummary() {
-    return graphiteConfig != null ? graphiteConfig.isSendSummary() : true;
+  
+  public boolean isCheckExtraConfiguration() {
+    return checkExtraConfiguration;
   }
 
   @Override
@@ -164,7 +187,7 @@ public class SitespeedBuilder extends Builder {
 
     try {
       // First run sitespeed
-      int returnValue = runSitespeed(sitespeedOutputDir.getAbsolutePath(), env, logStream);
+      int returnValue = runSitespeed(sitespeedOutputDir.getAbsolutePath(), env, logStream, build);
       String domainDirName =
           FileUtil.getInstance().getLastModifiedFileNameInDir(sitespeedOutputDir);
 
@@ -173,14 +196,6 @@ public class SitespeedBuilder extends Builder {
               FileUtil.getInstance().getLastModifiedFileInDir(sitespeedOutputDir));
 
       String thisRunsOutputDir = sitespeedOutputDir + "/" + domainDirName + "/" + dateDirName;
-
-      if (returnValue == 0) {
-        returnValue =
-            runJUnit(sitespeedOutputDir.getAbsolutePath(), build.getWorkspace().getRemote(), env,
-                logStream);
-
-        if (returnValue == 0 && checkGraphite) sendToGraphite(thisRunsOutputDir, logStream);
-      }
 
       String url =
           createUrlToAnalyzedPages(build.getProject().getName(), build.getNumber(), domainDirName,
@@ -208,53 +223,51 @@ public class SitespeedBuilder extends Builder {
 
   }
 
-  private int runJUnit(String resultBaseDir, String outputDir, EnvVars env, PrintStream logStream)
+
+  private int runSitespeed(String resultBaseDir, EnvVars env, PrintStream logStream, AbstractBuild<?, ?> build)
       throws InterruptedException {
-    BashRunner runner = new BashRunner(home);
+    BashRunner runner = new BashRunner(sitespeedExecutable);
     ParameterHelper paramHelper = new ParameterHelper(logStream);
-    List<String> args = paramHelper.getJUnitParamters(junitConfiguration, outputDir, resultBaseDir);
-    return runner.run(SitespeedConstants.SITESPEED_IO_JUNIT_SCRIPT, args, env, logStream);
-
-  }
-
-  private int runSitespeed(String resultBaseDir, EnvVars env, PrintStream logStream)
-      throws InterruptedException {
-    BashRunner runner = new BashRunner(home);
-    ParameterHelper paramHelper = new ParameterHelper(logStream);
-    List<String> args = paramHelper.getSitespeedParameters(sitespeedConfiguration, resultBaseDir);
-    return runner.run(SitespeedConstants.SITESPEED_IO_SCRIPT, args, env, logStream);
-  }
-
-  private boolean sendToGraphite(String fullOutputDir, PrintStream logStream) {
-
-    File dateDir = new File(fullOutputDir);
-    File pagesDir = new File(dateDir.getAbsolutePath() + "/data/pages");
-    File metricsDir = new File(dateDir.getAbsolutePath() + "/data/metrics");
-    File summaryDir = new File(dateDir.getAbsolutePath() + "/data");
-
-    ReadSitespeedXMLFiles readSitepseedXmlFiles = new ReadSitespeedXMLFilesJDOM();
-    Set<Page> pages = readSitepseedXmlFiles.getAnalyzedPages(pagesDir, logStream);
-    Set<PageTimings> pageTimings = readSitepseedXmlFiles.getPageTimings(metricsDir, logStream);
-    SiteSummary summary = readSitepseedXmlFiles.getSummary(summaryDir, logStream);
-
-    ConvertToGraphite cg = new ConvertToGraphite(graphiteConfig);
-    Map<String, Object> gdata = cg.get(pages, pageTimings, summary);
-    GraphiteSender g = new GraphiteSender(graphiteConfig.getHost(), graphiteConfig.getPort());
-    try {
-      logStream.println("Sending data to Graphite ...");
-      g.send(gdata);
-      logStream.println("Data sent ok.");
-      return true;
-
-    } catch (UnknownHostException e) {
-      logStream.println("Couldn't send data to Graphite:" + e.toString());
-      return false;
-    } catch (IOException e) {
-      logStream.println("Couldn't send data to Graphite:" + e.toString());
-      return false;
+    List<String> args = paramHelper.getSitespeedParameters((extraConfiguration!=null?extraConfiguration.getSitespeedConfiguration():""), resultBaseDir);
+    String filename = "budgetresult.txt";
+    if ("junit".equals(output)) {
+        args.add("--junit");
+        filename = new String(build.getWorkspace().getRemote() + "/" +  "sitespeed.io-junit.xml");
     }
-
+    else if ("tap".equals(output)) {
+        args.add("--tap");
+        new String(build.getWorkspace().getRemote() + "/" +  "sitespeed.io-junit.tap");
+    }
+    
+    String[] apa = urls.split("\n");
+    if (apa.length == 1) {
+      args.add("-u");
+      args.add(apa[0]);
+    }
+    else {
+      FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "urls.txt", urls, logStream);
+      args.add("-f");
+      args.add(build.getWorkspace().getRemote() + "/" + "urls.txt");
+    }
+    
+    FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "budget.json", budget, logStream);
+    args.add("--budget");
+    args.add(build.getWorkspace().getRemote() + "/" + "budget.json");
+    
+    args.add("-d");
+    args.add(crawlDepth.toString());
+    
+    if (!"".equals(browser)) {
+      args.add("-b");
+      args.add(browser);
+      args.add("-n");
+      args.add(runs.toString());
+    }
+    
+    
+    return runner.run(args, env, logStream, filename);
   }
+
 
   private boolean validateInput(AbstractBuild<?, ?> build, PrintStream logStream) {
 
@@ -264,14 +277,16 @@ public class SitespeedBuilder extends Builder {
           .println("The project name can't contain any spaces:" + build.getProject().getName());
       return false;
     }
-    if (sitespeedConfiguration == null || "".equals(sitespeedConfiguration)) {
-      logStream.println("You need to configure how sitespeed.io should run");
+
+    if (urls == null || "".equals(urls)) {
+      logStream.println("You need to configure the urls to test");
       return false;
     }
-
+    
     return true;
-
   }
+
+
 
   private EnvVars getEnvironment(AbstractBuild<?, ?> build, BuildListener listener) {
 
@@ -293,6 +308,30 @@ public class SitespeedBuilder extends Builder {
 
     public static final String GRAPHITE_TEST_KEY = "sitespeed.io.test";
 
+    public ListBoxModel doFillCrawlDepthItems() {
+      ListBoxModel items = new ListBoxModel();
+      items.add("Don't crawl", "0");
+      items.add("1", "1");
+      items.add("2", "2");
+      items.add("3", "3");
+     return items;
+  }  
+    
+    public ListBoxModel doFillBrowserItems() {
+      ListBoxModel items = new ListBoxModel();
+      items.add("No browser", "");
+      items.add("Chrome", "chrome");
+      items.add("Firefox", "firefox");
+     return items;
+  }  
+    
+    public ListBoxModel doFillRunsItems() {
+      ListBoxModel items = new ListBoxModel();
+      for (int i = 1; i<24; i++)
+      items.add(i+"", i+"");
+     return items;
+  }  
+    
     public FormValidation doCheckConfiguration(@QueryParameter String value) throws IOException,
         ServletException {
       if (value.length() == 0)
@@ -306,22 +345,26 @@ public class SitespeedBuilder extends Builder {
       if (!Hudson.getInstance().hasPermission(Hudson.ADMINISTER)) {
         return FormValidation.ok();
       }
-      
-      if ("".equals(value.getPath()))
-        return FormValidation.error("Please set the home dir");
-      
-      if (!value.isDirectory()) {
-        return FormValidation.error("This is not a directory");
-      }
 
-      final File sitespeedExecutable = new File(value, "bin/sitespeed.io");
-      if (!sitespeedExecutable.exists()) {
-        return FormValidation.error("The sitespeed.io script doesn't exist:" + sitespeedExecutable.getAbsolutePath());
-      }
-      if (!sitespeedExecutable.canExecute()) {
-        return FormValidation.error("The sitespeed.io script isn't executable");
+      if (!value.canExecute()) {
+        return FormValidation.error("The sitespeed.io binary isn't executable for Jenkins");
       }
       return FormValidation.ok();
+    }
+
+    public FormValidation doTestConnection(@QueryParameter("host") final String host,
+        @QueryParameter("port") final String port) throws IOException, ServletException {
+
+      GraphiteSender g = new GraphiteSender(host, Integer.parseInt(port));
+      Map<String, Object> test = new HashMap<String, Object>();
+      test.put(GRAPHITE_TEST_KEY, 1);
+      try {
+        g.send(test);
+        return FormValidation.ok("Test data sent to Graphite with key:" + GRAPHITE_TEST_KEY);
+      } catch (Exception e) {
+        return FormValidation.error("Couldn't send data to Graphite: " + e.getMessage());
+      }
+
     }
 
     public FormValidation doCheckNamespace(@QueryParameter String value) throws IOException,
@@ -353,31 +396,14 @@ public class SitespeedBuilder extends Builder {
 
     }
 
-    public FormValidation doTestConnection(@QueryParameter("host") final String host,
-        @QueryParameter("port") final String port) throws IOException, ServletException {
-
-      GraphiteSender g = new GraphiteSender(host, Integer.parseInt(port));
-      Map<String, Object> test = new HashMap<String, Object>();
-      test.put(GRAPHITE_TEST_KEY, 1);
-      try {
-        g.send(test);
-        return FormValidation.ok("Test data sent to Graphite with key:" + GRAPHITE_TEST_KEY);
-      } catch (Exception e) {
-        return FormValidation.error("Couldn't send data to Graphite: " + e.getMessage());
-      }
-
-    }
-
-    public FormValidation doValidateHomeDir(@QueryParameter("home") final String home)
+    public FormValidation doValidateBinary(@QueryParameter("home") final String home)
         throws IOException, ServletException {
-      String sitespeedHome = home;
-      if (home != null && !home.endsWith(File.separator)) sitespeedHome = home + File.separator;
 
-      File sitespeedScript = new File(sitespeedHome + SitespeedConstants.SITESPEED_IO_SCRIPT);
+      File sitespeedScript = new File(home);
       if (sitespeedScript.exists())
         return FormValidation.ok("Setup ok");
       else
-        return FormValidation.error("Couldn't find the sitespeed.io script in " + home);
+        return FormValidation.error("Couldn't find the sitespeed.io binary " + home);
 
     }
 

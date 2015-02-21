@@ -1,0 +1,53 @@
+<div>
+Configure the limits for your JUnit/TAP or budget. The configuration is the same independent of the output.
+Read more about how to configure at <a href="http://www.sitespeed.io/documentation/">the docs</a>.
+
+Example setting budget for page assets:
+<pre>
+{
+	"page": {
+    	"image": 10,
+        "css": 1,
+        "requests": 7,
+        "pageWeight":300000,
+        "jsWeight": 0
+    }
+}
+</pre>
+
+Example setting budget for timings:
+<pre>
+{
+	"timings": {
+    	"speedIndex": 1000,
+        "headerTime": 800,
+        "logoTime": 500,
+        "domContentLoadedTime": 900
+    }
+}
+</pre>
+
+Example setting budget for sitespeed.io rules (all rules needs to score 90 or more):
+<pre>
+{
+	"rules": {
+    	"default": 90
+  	}
+}
+</pre>
+
+
+Example setting budget for WebPageTest:
+<pre>
+{
+	"wpt": {
+    	"requests": 60,
+        "bytesIn": 1000000,
+        "SpeedIndex": 1000
+    }
+}
+</pre>
+
+You can of course also combine budgets.
+</div>
+
