@@ -4,7 +4,7 @@
  * and other contributors
  * Released under the Apache 2.0 License
  */
-package io.sitespeed.jenkins.graphite;
+package io.sitespeed.jenkins.configuration;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 

@@ -66,7 +66,7 @@
   		</f:entry>
   
    		<f:entry title="Namespace of the Graphite keys" field="namespace">
-    		<f:textbox clazz="required"/>
+    		<f:textbox clazz="required" default="sitespeed"/>
   		</f:entry>
     
     	<f:entry title="Send Navigation Timing API data intervals per page" field="sendTimings">
@@ -89,7 +89,7 @@
 
 <f:block>
 	<f:optionalBlock name="checkWpt" checked="${instance.checkWpt}" title="Test using WebPageTest">
-    	<f:entry title="Hostname" field="wptHost">
+    	<f:entry title="Hostname" field="wptHost" default="www.webpagetest.org">
     		<f:textbox />
  	 	</f:entry>
  	  	<f:entry title="WPTKey" field="wptKey">

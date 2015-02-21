@@ -21,7 +21,10 @@ import io.sitespeed.jenkins.BashRunner;
 import io.sitespeed.jenkins.ParameterHelper;
 import io.sitespeed.jenkins.SitespeedConstants;
 import io.sitespeed.jenkins.SitespeedLinkAction;
-import io.sitespeed.jenkins.graphite.GraphiteConfiguration;
+import io.sitespeed.jenkins.configuration.ExecutablePathConfiguration;
+import io.sitespeed.jenkins.configuration.ExtraConfiguration;
+import io.sitespeed.jenkins.configuration.GraphiteConfiguration;
+import io.sitespeed.jenkins.configuration.WPTConfiguration;
 import io.sitespeed.jenkins.graphite.GraphiteSender;
 import io.sitespeed.jenkins.util.FileUtil;
 
@@ -102,12 +105,14 @@ public class SitespeedBuilder extends Builder {
     this.browser = browser;
     this.runs = runs;
  
+    System.out.println("a:" + output);
+    
     graphiteConfig = checkGraphite;
     this.checkGraphite = checkGraphite == null ? false : true;
     this.checkExtraConfiguration = extraConfiguration == null ? false : true;
     this.checkPath = executablePath == null ? false : true;
     this.checkWpt = wptConfig == null ? false : true;
-    this.output = output == null ? "junit" : output;
+    this.output = "".equals(output) ? "junit" : output;
     this.crawlDepth = crawlDepth == null ? 0 : crawlDepth;
  
   }
@@ -239,10 +244,10 @@ public class SitespeedBuilder extends Builder {
         new String(build.getWorkspace().getRemote() + "/" +  "sitespeed.io-junit.tap");
     }
     
-    String[] apa = urls.split("\n");
-    if (apa.length == 1) {
+    String[] theUrls = urls.split("\n");
+    if (theUrls.length == 1) {
       args.add("-u");
-      args.add(apa[0]);
+      args.add(theUrls[0]);
     }
     else {
       FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "urls.txt", urls, logStream);
@@ -264,6 +269,30 @@ public class SitespeedBuilder extends Builder {
       args.add(runs.toString());
     }
     
+    if (wptConfig!=null) {
+     if (!"".equals(wptConfig.getWptHost())) {
+       args.add("--wptHost");
+       args.add(wptConfig.getWptHost());
+     }
+     if (!"".equals(wptConfig.getWptKey())) {
+       args.add("--wptKey");
+       args.add(wptConfig.getWptKey());
+     }
+     if (!"".equals(wptConfig.getWptConfig())) {
+       args.add("--wptConfig");
+       args.add(wptConfig.getWptConfig());
+     }
+    }
+    
+    if (graphiteConfig!=null) {
+      args.add("--graphiteHost");
+      args.add(graphiteConfig.getHost());
+      args.add("--graphiteNamespace");
+      args.add(graphiteConfig.getNamespace());
+      args.add("--graphitePort");
+      args.add(graphiteConfig.getPort()+"");
+      
+    }
     
     return runner.run(args, env, logStream, filename);
   }

@@ -8,9 +8,6 @@ package io.sitespeed.jenkins;
 
 public class SitespeedConstants {
 
-  public final static String SITESPEED_IO_JUNIT_SCRIPT = "bin/sitespeed.io-junit";
   public final static String DEFAULT_OUTPUT_DIR = "sitespeed-result";
-  public final static String SUMMARY_XML_FILENAME = "summary.xml";
-
   private SitespeedConstants() {}
 }
