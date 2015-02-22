@@ -6,6 +6,11 @@ package io.sitespeed.jenkins.configuration;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Configure WebPageTest.
+ * @author peter
+ *
+ */
 public class WPTConfiguration {
 
   private final String wptHost; 

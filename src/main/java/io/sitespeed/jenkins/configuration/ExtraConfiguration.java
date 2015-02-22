@@ -6,6 +6,11 @@ package io.sitespeed.jenkins.configuration;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Add all extra sitespeed configuration here.
+ * @author peter
+ *
+ */
 public class ExtraConfiguration {
 
   private final String sitespeedConfiguration;

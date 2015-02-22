@@ -6,6 +6,12 @@ package io.sitespeed.jenkins.configuration;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Configure the path to the executable 
+ * or your /bin/sitespeed.js script.
+ * @author peter
+ *
+ */
 public class ExecutablePathConfiguration {
 
   private final String sitespeedExecutable;

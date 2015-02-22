@@ -8,6 +8,11 @@ package io.sitespeed.jenkins.configuration;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Configure Graphite.
+ * @author peter
+ *
+ */
 public class GraphiteConfiguration {
 
     private final String host;
