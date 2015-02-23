@@ -6,12 +6,9 @@ Current status: When the plugin can run as a slave the 1.0 will be released.
 
 ## Functionality
 - Test your site against sitespeed.io best practice web performance rules and metrics from the Navigation Timing API
-- Break builds using JUnit (both for rule score & Navigation Timing metrics)
-- Choose which data you want to send to Graphite:
-  - Sitespeed.io rule score per page
-  - Navigation Timing API & User Timings interval metrics per page
-  - Page metrics (like number of javascripts, css and images) per page
-  - Summary of the rules score & Navigation Timing API metrics for all tested pages
+- Break builds using JUnit/TAP or built in budget.
+- Send all the metrics to Graphite.
+- Test using [WebPageTest](http://www.webpagetest.org)
 
 ## How to run in Jenkins
 - Build the HPI file (not included in Jenkins automatically yet)
