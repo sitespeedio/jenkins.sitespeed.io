@@ -13,7 +13,7 @@ Current status: When the plugin can run as a slave the 1.0 will be released.
 ## How to run in Jenkins
 - Build the HPI file (not included in Jenkins automatically yet)
 - Install the HPI file in Jenkins
-- Download the latest version of sitespeed.io from http://www.sitespeed.io and put that on your Jenkins server
+- Install the latest version of sitespeed.io on your Jenkins server <code>npm install -g sitespeed.io</code>
 - Configure the plugin
 - Run it!
 
