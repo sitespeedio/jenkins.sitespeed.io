@@ -1,8 +1,6 @@
 /**
- * Sitespeed.io - How speedy is your site? (http://www.sitespeed.io)
- * Copyright (c) 2014, Peter Hedenskog, Tobias Lidskog
- * and other contributors
- * Released under the Apache 2.0 License
+ * Sitespeed.io - How speedy is your site? (http://www.sitespeed.io) Copyright (c) 2014, Peter
+ * Hedenskog, Tobias Lidskog and other contributors Released under the Apache 2.0 License
  */
 package io.sitespeed.jenkins;
 
@@ -48,7 +46,7 @@ public class SitespeedBuilder extends Builder {
   private final ExtraConfiguration extraConfiguration;
 
   /**
-   * The JUnit configuration.
+   * The limit configutration for budget/TAP/JUnit.
    */
   private final String budget;
 
@@ -57,34 +55,62 @@ public class SitespeedBuilder extends Builder {
    */
   private final String sitespeedExecutable;
 
+  /**
+   * Which browser to use.
+   */
   private final String browser;
-  
+
+
+  /**
+   * How many runs in each browser.
+   */
   private final Integer runs;
-  
+
   /**
    * If Graphite is checked or not.
    */
   private final boolean checkGraphite;
-  
+
+  /**
+   * If the extra configuration box is checked or not.
+   */
   private final boolean checkExtraConfiguration;
-  
+
+  /**
+   * If the path to the sitespeed binary box is checked or not.
+   */
   private final boolean checkPath;
-  
+
+  /**
+   * If the checkbox for WebPagetTest is checked or not.
+   */
   private final boolean checkWpt;
 
+  /**
+   * Configuration for Graphite.
+   */
   private GraphiteConfiguration graphiteConfig;
-  
+
+  /**
+   * The URL:s to test.
+   */
   private final String urls;
-  
+
+  /**
+   * How deep we wanna crawl.
+   */
   private final Integer crawlDepth;
-  
+
+  /**
+   * The configuration for WebPageTest.
+   */
   private final WPTConfiguration wptConfig;
 
   /**
    * The output type JUnitXML/TAP or budget
    */
   private final String output;
-  
+
   private final String defaultBudget = "{\"rules\": \n{ \"default\": 90 }\n}";
 
   /**
@@ -93,28 +119,28 @@ public class SitespeedBuilder extends Builder {
   private static final String ICON_URL = "/plugin/sitespeed/logo48x48.png";
 
   @DataBoundConstructor
-  public SitespeedBuilder(ExtraConfiguration extraConfiguration, String budget, ExecutablePathConfiguration executablePath,
-      String output, GraphiteConfiguration checkGraphite, String urls, Integer crawlDepth, String browser, Integer runs, WPTConfiguration wptConfig) {
-    this.extraConfiguration = extraConfiguration;
+  public SitespeedBuilder(ExtraConfiguration checkExtraConfiguration, String budget,
+      ExecutablePathConfiguration checkPath, String output,
+      GraphiteConfiguration checkGraphite, String urls, Integer crawlDepth, String browser,
+      Integer runs, WPTConfiguration checkWpt) {
 
-    this.sitespeedExecutable = executablePath == null ? "sitespeed.io" : executablePath.getSitespeedExecutable();
-    this.budget = "".equals(budget) ? defaultBudget: budget;
-    this.wptConfig = wptConfig;
-    this.urls = urls;
+    extraConfiguration = checkExtraConfiguration;
     
+    sitespeedExecutable =
+        checkPath == null ? "sitespeed.io" : checkPath.getSitespeedExecutable();
+    this.budget = "".equals(budget) || budget == null ? defaultBudget : budget;
+    wptConfig = checkWpt;
+    this.urls = urls;
     this.browser = browser;
     this.runs = runs;
- 
-    System.out.println("a:" + output);
-    
     graphiteConfig = checkGraphite;
     this.checkGraphite = checkGraphite == null ? false : true;
     this.checkExtraConfiguration = extraConfiguration == null ? false : true;
-    this.checkPath = executablePath == null ? false : true;
+    this.checkPath = checkPath == null ? false : true;
     this.checkWpt = wptConfig == null ? false : true;
     this.output = "".equals(output) ? "junit" : output;
     this.crawlDepth = crawlDepth == null ? 0 : crawlDepth;
- 
+     
   }
 
   @Override
@@ -126,22 +152,38 @@ public class SitespeedBuilder extends Builder {
     return sitespeedExecutable;
   }
   
+  public String getSitespeedConfiguration() {
+    return extraConfiguration!=null?extraConfiguration.getSitespeedConfiguration():"";
+  }
+
+  public String getWptKey() {
+    return  wptConfig!=null?wptConfig.getWptKey():"";
+  }
+  
+  public String getWptHost() {
+    return  wptConfig!=null?wptConfig.getWptHost():"";
+  }
+  
+  public String getWptConfig() {
+    return  wptConfig!=null?wptConfig.getWptConfig():"";
+  }
+  
   public int getCrawlDepth() {
     return crawlDepth;
   }
-  
+
   public String getBrowser() {
     return browser;
   }
-  
+
   public int getRuns() {
     return runs;
   }
-  
+
   public String getOutput() {
     return output;
   }
-  
+
   public String getUrls() {
     return urls;
   }
@@ -166,15 +208,15 @@ public class SitespeedBuilder extends Builder {
   public boolean isCheckGraphite() {
     return checkGraphite;
   }
-  
+
   public boolean isCheckPath() {
     return checkPath;
   }
-  
+
   public boolean isCheckWpt() {
     return checkWpt;
   }
-  
+
   public boolean isCheckExtraConfiguration() {
     return checkExtraConfiguration;
   }
@@ -185,7 +227,7 @@ public class SitespeedBuilder extends Builder {
     EnvVars env = getEnvironment(build, listener);
     PrintStream logStream = listener.getLogger();
 
-    // TODO check that everything is setup ok.
+    // simple check that everything is setup ok.
     if (!validateInput(build, logStream)) return false;
 
     File sitespeedOutputDir = FileUtil.getInstance().getSitespeedOutputDir(build);
@@ -199,8 +241,6 @@ public class SitespeedBuilder extends Builder {
       String dateDirName =
           FileUtil.getInstance().getLastModifiedFileNameInDir(
               FileUtil.getInstance().getLastModifiedFileInDir(sitespeedOutputDir));
-
-      String thisRunsOutputDir = sitespeedOutputDir + "/" + domainDirName + "/" + dateDirName;
 
       String url =
           createUrlToAnalyzedPages(build.getProject().getName(), build.getNumber(), domainDirName,
@@ -229,74 +269,87 @@ public class SitespeedBuilder extends Builder {
   }
 
 
-  private int runSitespeed(String resultBaseDir, EnvVars env, PrintStream logStream, AbstractBuild<?, ?> build)
-      throws InterruptedException {
+  private int runSitespeed(String resultBaseDir, EnvVars env, PrintStream logStream,
+      AbstractBuild<?, ?> build) throws InterruptedException {
     BashRunner runner = new BashRunner(sitespeedExecutable);
     ParameterHelper paramHelper = new ParameterHelper(logStream);
-    List<String> args = paramHelper.getSitespeedParameters((extraConfiguration!=null?extraConfiguration.getSitespeedConfiguration():""), resultBaseDir);
-    String filename = "budgetresult.txt";
-    if ("junit".equals(output)) {
-        args.add("--junit");
-        filename = new String(build.getWorkspace().getRemote() + "/" +  "sitespeed.io-junit.xml");
-    }
-    else if ("tap".equals(output)) {
-        args.add("--tap");
-        new String(build.getWorkspace().getRemote() + "/" +  "sitespeed.io-junit.tap");
-    }
+    List<String> args =
+        paramHelper.getSitespeedParameters(
+            (extraConfiguration != null ? extraConfiguration.getSitespeedConfiguration() : ""),
+            resultBaseDir);
     
+    
+    String filename = addSitespeedParameters(args, build, logStream);
+
+    return runner.run(args, env, logStream, filename);
+  }
+  
+  private String addSitespeedParameters(List<String> args, AbstractBuild<?, ?> build, PrintStream logStream) {
+ 
+    String filename = "budgetresult.txt";
+    
+    // add specific pararmeters to sitespeed.
+    if ("junit".equals(output)) {
+      args.add("--junit");
+      filename = new String(build.getWorkspace().getRemote() + "/" + "sitespeed.io-junit.xml");
+    } else if ("tap".equals(output)) {
+      args.add("--tap");
+      new String(build.getWorkspace().getRemote() + "/" + "sitespeed.io-junit.tap");
+    }
+
     String[] theUrls = urls.split("\n");
     if (theUrls.length == 1) {
       args.add("-u");
       args.add(theUrls[0]);
-    }
-    else {
-      FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "urls.txt", urls, logStream);
+    } else {
+      FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "urls.txt", urls,
+          logStream);
       args.add("-f");
       args.add(build.getWorkspace().getRemote() + "/" + "urls.txt");
     }
-    
-    FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "budget.json", budget, logStream);
+
+    FileUtil.getInstance().storeFile(build.getWorkspace().getRemote() + "/" + "budget.json",
+        budget, logStream);
     args.add("--budget");
     args.add(build.getWorkspace().getRemote() + "/" + "budget.json");
-    
+
     args.add("-d");
     args.add(crawlDepth.toString());
-    
+
     if (!"".equals(browser)) {
       args.add("-b");
       args.add(browser);
       args.add("-n");
       args.add(runs.toString());
     }
-    
-    if (wptConfig!=null) {
-     if (!"".equals(wptConfig.getWptHost())) {
-       args.add("--wptHost");
-       args.add(wptConfig.getWptHost());
-     }
-     if (!"".equals(wptConfig.getWptKey())) {
-       args.add("--wptKey");
-       args.add(wptConfig.getWptKey());
-     }
-     if (!"".equals(wptConfig.getWptConfig())) {
-       args.add("--wptConfig");
-       args.add(wptConfig.getWptConfig());
-     }
+
+    if (wptConfig != null) {
+      if (!"".equals(wptConfig.getWptHost())) {
+        args.add("--wptHost");
+        args.add(wptConfig.getWptHost());
+      }
+      if (!"".equals(wptConfig.getWptKey())) {
+        args.add("--wptKey");
+        args.add(wptConfig.getWptKey());
+      }
+      if (!"".equals(wptConfig.getWptConfig())) {
+        args.add("--wptConfig");
+        args.add(wptConfig.getWptConfig());
+      }
     }
-    
-    if (graphiteConfig!=null) {
+
+    if (graphiteConfig != null) {
       args.add("--graphiteHost");
       args.add(graphiteConfig.getHost());
       args.add("--graphiteNamespace");
       args.add(graphiteConfig.getNamespace());
       args.add("--graphitePort");
-      args.add(graphiteConfig.getPort()+"");
-      
-    }
-    
-    return runner.run(args, env, logStream, filename);
-  }
+      args.add(graphiteConfig.getPort() + "");
 
+    }
+    return filename;
+    
+  }
 
   private boolean validateInput(AbstractBuild<?, ?> build, PrintStream logStream) {
 
@@ -311,7 +364,7 @@ public class SitespeedBuilder extends Builder {
       logStream.println("You need to configure the urls to test");
       return false;
     }
-    
+
     return true;
   }
 
@@ -343,24 +396,24 @@ public class SitespeedBuilder extends Builder {
       items.add("1", "1");
       items.add("2", "2");
       items.add("3", "3");
-     return items;
-  }  
-    
+      return items;
+    }
+
     public ListBoxModel doFillBrowserItems() {
       ListBoxModel items = new ListBoxModel();
       items.add("No browser", "");
       items.add("Chrome", "chrome");
       items.add("Firefox", "firefox");
-     return items;
-  }  
-    
+      return items;
+    }
+
     public ListBoxModel doFillRunsItems() {
       ListBoxModel items = new ListBoxModel();
-      for (int i = 1; i<24; i++)
-      items.add(i+"", i+"");
-     return items;
-  }  
-    
+      for (int i = 1; i < 24; i++)
+        items.add(i + "", i + "");
+      return items;
+    }
+
     public FormValidation doCheckConfiguration(@QueryParameter String value) throws IOException,
         ServletException {
       if (value.length() == 0)
@@ -425,14 +478,25 @@ public class SitespeedBuilder extends Builder {
 
     }
 
-    public FormValidation doValidateBinary(@QueryParameter("home") final String home)
+    public FormValidation doValidateBinary(@QueryParameter("sitespeedExecutable") final String home)
         throws IOException, ServletException {
 
+      if ("sitespeed.io".equals(home)) {
+       try {
+        Runtime.getRuntime().exec("sitespeed.io --version");
+        return FormValidation.ok("Setup ok");
+       }
+       catch (Exception e) {
+         return FormValidation.error("Couldn't find the sitespeed.io binary " + home);
+       }
+      }
+      else {
       File sitespeedScript = new File(home);
       if (sitespeedScript.exists())
         return FormValidation.ok("Setup ok");
       else
         return FormValidation.error("Couldn't find the sitespeed.io binary " + home);
+      }
 
     }
 

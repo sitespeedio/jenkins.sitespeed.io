@@ -19,7 +19,7 @@ public class WPTConfiguration {
 
 
   @DataBoundConstructor
-  public WPTConfiguration(String wptHost, String wptKey, String wptConfig ) {
+  public WPTConfiguration(String wptHost, String wptKey, String wptConfig) {
     this.wptHost = wptHost;
     this.wptKey = wptKey;
     this.wptConfig = wptConfig;

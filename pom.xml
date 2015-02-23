@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>1.598</version>
+		<version>1.509.3</version>
 	</parent>
 
 	<groupId>io.sitespeed.jenkins</groupId>
@@ -16,9 +16,9 @@
 
 	<licenses>
 		<license>
-			<name>MIT</name>
-			<url>http://opensource.org/licenses/MIT</url>
-			<distribution>repo</distribution>
+			 <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
 		</license>
 	</licenses>
 
@@ -32,16 +32,12 @@
 			<email>peter@soulgalore.com</email>
 			<timezone>+1</timezone>
 		</developer>
+		<developer>
+			<name>Tobias Lidskog</name>
+			<timezone>+1</timezone>
+		</developer>
 	</developers>
 	
-	<dependencies>
-		<dependency>
-			<groupId>org.jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>2.0.2</version>
-		</dependency>
-	</dependencies>
-
 	<repositories>
 		<repository>
 			<id>repo.jenkins-ci.org</id>
