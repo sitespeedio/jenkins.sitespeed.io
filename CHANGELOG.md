@@ -1,5 +1,10 @@
 # sitespeed.io Jenkins plugin changelog
 
+version 1.0 BETA 8
+----------------------
+* We now support sitespeed.io 3.X! Built in support for Graphite & WebPageTest.
+
+
 version 1.0 BETA 7
 ----------------------
 * Translate Jenkins ENV variables in arguments sent to the sitespeed scripts
