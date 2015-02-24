@@ -5,10 +5,10 @@ This is the official plugin for running sitespeed.io in Jenkins ([documentation]
 Current status: When the plugin can run as a slave the 1.0 will be released.
 
 ## Functionality
-- Test your site against sitespeed.io best practice web performance rules and metrics from the Navigation Timing API
+- Test your site against sitespeed.io best practice web performance rules and browser timing metrics fetched from the Navigation Timing API and User Timings.
 - Break builds using JUnit/TAP or built in budget.
 - Send all the metrics to Graphite.
-- Test using [WebPageTest](http://www.webpagetest.org)
+- Test using [WebPageTest](http://www.webpagetest.org).
 
 It looks like this:
 ![Jenkins plugin](http://www.sitespeed.io/documentation/jenkins-plugin-configuration.png)
