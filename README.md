@@ -1,6 +1,6 @@
 # Jenkins plugin for sitespeed.io [![Build Status](https://travis-ci.org/sitespeedio/jenkins.sitespeed.io.png?branch=master)](https://travis-ci.org/sitespeedio/jenkins.sitespeed.io)
 
-This is the official plugin for running sitespeed.io in Jenkins ([documentation]( http://www.sitespeed.io/documentation/#jenkinsplugin)). 
+This is the official plugin for running sitespeed.io in Jenkins ([documentation]( http://www.sitespeed.io/documentation/#jenkins)). 
 
 Current status: When the plugin can run as a slave the 1.0 will be released.
 
