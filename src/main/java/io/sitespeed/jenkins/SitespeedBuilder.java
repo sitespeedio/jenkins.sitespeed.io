@@ -404,6 +404,7 @@ public class SitespeedBuilder extends Builder {
       items.add("No browser", "");
       items.add("Chrome", "chrome");
       items.add("Firefox", "firefox");
+      items.add("Safari (8 or later)", "safari");
       return items;
     }
 
