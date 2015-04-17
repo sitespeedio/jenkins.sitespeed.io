@@ -114,6 +114,11 @@ public class SitespeedBuilder extends Builder {
   private final String defaultBudget = "{\"rules\": \n{ \"default\": 90 }\n}";
 
   /**
+   * Turn on/off verbose logging
+   */
+  private final boolean verbose;
+  
+  /**
    * The URL to the sitespeed logo.
    */
   private static final String ICON_URL = "/plugin/sitespeed/logo48x48.png";
@@ -122,7 +127,7 @@ public class SitespeedBuilder extends Builder {
   public SitespeedBuilder(ExtraConfiguration checkExtraConfiguration, String budget,
       ExecutablePathConfiguration checkPath, String output,
       GraphiteConfiguration checkGraphite, String urls, Integer crawlDepth, String browser,
-      Integer runs, WPTConfiguration checkWpt) {
+      Integer runs, WPTConfiguration checkWpt, Boolean verbose) {
 
     extraConfiguration = checkExtraConfiguration;
     
@@ -133,6 +138,7 @@ public class SitespeedBuilder extends Builder {
     this.urls = urls;
     this.browser = browser;
     this.runs = runs;
+    this.verbose = verbose;
     graphiteConfig = checkGraphite;
     this.checkGraphite = checkGraphite == null ? false : true;
     this.checkExtraConfiguration = extraConfiguration == null ? false : true;
@@ -140,7 +146,6 @@ public class SitespeedBuilder extends Builder {
     this.checkWpt = wptConfig == null ? false : true;
     this.output = "".equals(output) ? "junit" : output;
     this.crawlDepth = crawlDepth == null ? 0 : crawlDepth;
-     
   }
 
   @Override
@@ -347,6 +352,11 @@ public class SitespeedBuilder extends Builder {
       args.add(graphiteConfig.getPort() + "");
 
     }
+    
+    if (verbose) {
+      args.add("--verbose");
+    }
+    
     return filename;
     
   }

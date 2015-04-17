@@ -33,6 +33,10 @@
    <f:textarea clazz="required" default="${instance.budget}"/>
 </f:entry> 		
  
+<f:entry title="Turn on verbose logging" field="verbose">
+   <f:checkbox/>
+</f:entry>  
+ 
 
  <f:block>
  	<f:optionalBlock name="checkExtraConfiguration" checked="${instance.checkExtraConfiguration}" title="Add extra configuration">
